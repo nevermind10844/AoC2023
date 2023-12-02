@@ -1,0 +1,8 @@
+﻿.metadata
+/.metadata/
+*/.settings
+*/bin
+*/target
+*.classpath
+*.project
+AoC_Day1_2/pom.xml
