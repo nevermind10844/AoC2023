@@ -33,6 +33,10 @@ public class Tile {
 	public void setPosY(int posY) {
 		this.posY = posY;
 	}
+	
+	public void flipType() {
+		this.type = this.type == TileType.ASH ? TileType.ROCK : TileType.ASH;
+	}
 
 	@Override
 	public String toString() {
