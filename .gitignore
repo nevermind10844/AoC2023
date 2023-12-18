@@ -7,3 +7,4 @@
 *.project
 AoC_Day1_2/pom.xml
 */pom.xml
+*/*/input.txt
