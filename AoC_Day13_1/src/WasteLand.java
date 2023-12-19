@@ -48,6 +48,14 @@ public class WasteLand {
 	public int getLinesBefore() {
 		return linesBefore;
 	}
+	
+	public boolean isVerticalMirror() {
+		return linesBefore > 0;
+	}
+
+	public boolean isHorizontalMirror() {
+		return linesAbove > 0;
+	}
 
 	public void done() {
 		for (int y = 0; y < this.height; y++) {

@@ -25,10 +25,18 @@ public class Main {
 		}
 		
 		maps.add(map);
+		
+		int verticals = 0;
+		int horizontals = 0;
 
 		for (WasteLand wasteLand : maps) {
 			wasteLand.done();
-			int currentResult = wasteLand.getLinesBefore() + (100 * wasteLand.getLinesAbove());
+			boolean isVertical = wasteLand.isVerticalMirror();
+			boolean isHorizontal = wasteLand.isHorizontalMirror();
+			
+			System.out.println(String.format("isVertical: %b isHorizontal: %b", isVertical, isHorizontal));
+			
+			//int currentResult = wasteLand.getLinesBefore() + (100 * wasteLand.getLinesAbove());
 			List<Tile> tiles = wasteLand.getTiles();
 			for(int i=0; i<tiles.size(); i++) {
 				wasteLand.reset();
@@ -37,15 +45,25 @@ public class Main {
 				}
 				tiles.get(i).flipType();
 				wasteLand.done();
-				int newResult = wasteLand.getLinesBefore() + (100 * wasteLand.getLinesAbove());
-				if(newResult > 0 && newResult != currentResult)
-					break;
+				if(isVertical) {
+					int newVertical = wasteLand.getLinesBefore();
+					if(newVertical > 0) {
+						verticals += newVertical;
+						break;
+					}
+				} else if(isHorizontal){
+					int newHorizontal = wasteLand.getLinesAbove();
+					if(newHorizontal > 0) {
+						horizontals += newHorizontal;
+						break;
+					}
+				}
+			
 			}
 		}
 		
-		int linesBefore = maps.stream().mapToInt(WasteLand::getLinesBefore).sum();
-		int linesAbove = maps.stream().mapToInt(WasteLand::getLinesAbove).sum();
 		
-		System.out.println(linesBefore + (100 * linesAbove));
+		
+		System.out.println(verticals + (100 * horizontals));
 	}
 }
