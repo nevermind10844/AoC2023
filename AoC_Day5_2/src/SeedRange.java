@@ -1,29 +1,27 @@
-import java.math.BigInteger;
-
 public class SeedRange {
-	private BigInteger seed;
-	private BigInteger range;
+	private long seed;
+	private long range;
 	private boolean checked;
 
 	public SeedRange() {
-		this.seed = BigInteger.ZERO;
-		this.range = BigInteger.ZERO;
+		this.seed = 0L;
+		this.range = 0L;
 		setChecked(false);
 	}
 
-	public BigInteger getSeed() {
+	public long getSeed() {
 		return seed;
 	}
 
-	public void setSeed(BigInteger seed) {
+	public void setSeed(long seed) {
 		this.seed = seed;
 	}
 
-	public BigInteger getRange() {
+	public long getRange() {
 		return range;
 	}
 
-	public void setRange(BigInteger range) {
+	public void setRange(long range) {
 		this.range = range;
 	}
 
@@ -35,17 +33,17 @@ public class SeedRange {
 		this.checked = checked;
 	}
 	
-	public boolean isInRange(BigInteger source) {
-		return greaterOrEquals(source, this.seed) && smallerOrEquals(source, this.seed.add(this.range));
+	public boolean isInRange(long source) {
+		return source >= this.seed && source <= this.seed + this.range;
 	}
 	
-	private boolean greaterOrEquals(BigInteger first, BigInteger second) {
-		return first.compareTo(second) >= 0;
-	}
-	
-	private boolean smallerOrEquals(BigInteger first, BigInteger second) {
-		return second.compareTo(first) >= 0;
-	}
+//	private boolean greaterOrEquals(BigInteger first, BigInteger second) {
+//		return first.compareTo(second) >= 0;
+//	}
+//	
+//	private boolean smallerOrEquals(BigInteger first, BigInteger second) {
+//		return second.compareTo(first) >= 0;
+//	}
 
 	@Override
 	public String toString() {

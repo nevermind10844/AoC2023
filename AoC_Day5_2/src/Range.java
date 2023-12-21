@@ -1,46 +1,44 @@
-import java.math.BigInteger;
-
 public class Range {
-	private BigInteger source;
-	private BigInteger destination;
-	private BigInteger range;
+	private long source;
+	private long destination;
+	private long range;
 
 	public Range() {
-		this.source = BigInteger.ZERO;
-		this.destination = BigInteger.ZERO;
-		this.range = BigInteger.ZERO;
+		this.source = 0;
+		this.destination = 0;
+		this.range = 0;
 	}
 
-	public BigInteger getSource() {
+	public long getSource() {
 		return source;
 	}
 
-	public void setSource(BigInteger source) {
+	public void setSource(long source) {
 		this.source = source;
 	}
 
-	public BigInteger getDestination() {
+	public long getDestination() {
 		return destination;
 	}
 
-	public void setDestination(BigInteger destination) {
+	public void setDestination(long destination) {
 		this.destination = destination;
 	}
 
-	public BigInteger getRange() {
+	public long getRange() {
 		return range;
 	}
 
-	public void setRange(BigInteger range) {
+	public void setRange(long range) {
 		this.range = range;
 	}
 
-	public boolean isInRange(BigInteger source) {
-		return greaterOrEquals(source, this.source) && smallerThan(source, this.source.add(this.range));
+	public boolean isInRange(long source) {
+		return source>=this.source && source < this.source + this.range;
 	}
 
-	public BigInteger getDestination(BigInteger source) {
-		return source.subtract(this.source).add(this.destination);
+	public long getDestination(long source) {
+		return source - this.source + this.destination;
 	}
 
 	@Override
@@ -48,12 +46,12 @@ public class Range {
 		return "Range [source=" + source + ", destination=" + destination + ", range=" + range + "]";
 	}
 
-	private boolean greaterOrEquals(BigInteger first, BigInteger second) {
-		return first.compareTo(second) >= 0;
-	}
-	
-	private boolean smallerThan(BigInteger first, BigInteger second) {
-		return first.compareTo(second) < 0;
-	}
+//	private boolean greaterOrEquals(BigInteger first, BigInteger second) {
+//		return first.compareTo(second) >= 0;
+//	}
+//
+//	private boolean smallerThan(BigInteger first, BigInteger second) {
+//		return first.compareTo(second) < 0;
+//	}
 
 }

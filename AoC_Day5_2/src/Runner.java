@@ -1,4 +1,3 @@
-import java.math.BigInteger;
 import java.util.List;
 
 public class Runner extends Thread {
@@ -7,7 +6,7 @@ public class Runner extends Thread {
 	private SeedRange seedRange;
 	private List<MappingTable> tables;
 	
-	private BigInteger result = BigInteger.valueOf(-1L);
+	private long result = -1L;
 	private boolean done = false;
 
 	Runner(SeedRange seedRange, List<MappingTable> tables) {
@@ -15,7 +14,7 @@ public class Runner extends Thread {
 		this.tables = tables;
 	}
 	
-	public BigInteger getResult() {
+	public long getResult() {
 		return this.result;
 	}
 	
@@ -24,22 +23,22 @@ public class Runner extends Thread {
 	}
 
 	public void run() {
-		BigInteger result = BigInteger.valueOf(-1L);
-		BigInteger seed = seedRange.getSeed();
+		long result = -1L;
+		long seed = seedRange.getSeed();
 		
-		while (seed.compareTo(seedRange.getSeed().add(seedRange.getRange())) < 0) {
-			BigInteger source = seed;
+		while (seed < seedRange.getSeed() + seedRange.getRange()) {
+			long source = seed;
 			for (int j = 0; j < tables.size(); j++) {
 				source = tables.get(j).getDestination(source);
 			}
 
-			if (result.compareTo(BigInteger.ZERO) < 0) {
+			if (result < 0) {
 				result = source;
-			} else if (source.compareTo(result) < 0) {
+			} else if (source < result) {
 				result = source;
 			}
 
-			seed = seed.add(BigInteger.ONE);
+			seed++;;
 			this.result = result;
 		}
 		

@@ -1,5 +1,3 @@
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,8 +15,8 @@ public class Main {
 			if (string.contains("seeds:")) {
 				String[] seedsArr = string.split(": ")[1].split(" ");
 				for (int i = 0; i < seedsArr.length; i+=2) {
-					BigInteger start = new BigInteger(seedsArr[i]);
-					BigInteger range = new BigInteger(seedsArr[i+1]);
+					long start = Long.valueOf(seedsArr[i]);
+					long range = Long.valueOf(seedsArr[i+1]);
 					SeedRange sr = new SeedRange();
 					sr.setSeed(start);
 					sr.setRange(range);
@@ -36,9 +34,9 @@ public class Main {
 			} else if (mapName != null) {
 				String[] ranges = string.split(" ");
 				Range range = new Range();
-				range.setDestination(new BigInteger(ranges[0]));
-				range.setSource(new BigInteger(ranges[1]));
-				range.setRange(new BigInteger(ranges[2]));
+				range.setDestination(Long.valueOf(ranges[0]));
+				range.setSource(Long.valueOf(ranges[1]));
+				range.setRange(Long.valueOf(ranges[2]));
 				currentMappingTable.addRange(range);
 			}
 		}
@@ -47,7 +45,7 @@ public class Main {
 		mapName = null;
 		currentMappingTable = null;
 		
-		BigInteger result = BigInteger.valueOf(-1L);
+		long result = Long.valueOf(-1L);
 		
 		List<Runner> runnerList = new ArrayList<>();
 		
@@ -68,11 +66,11 @@ public class Main {
 				e.printStackTrace();
 			}
 			for (Runner runner : runnerList) {
-				BigInteger source = runner.getResult();
-				if (result.compareTo(BigInteger.ZERO) < 0) {
+				long source = runner.getResult();
+				if (result < 0L) {
 					result = source;
 					System.out.println("initially smallest location: " + result);
-				} else if (source.compareTo(result) < 0) {
+				} else if (source < result) {
 					result = source;
 					System.out.println("newest smallest location: " + result);
 				}

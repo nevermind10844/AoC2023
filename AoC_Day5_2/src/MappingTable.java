@@ -1,4 +1,3 @@
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +30,8 @@ public class MappingTable {
 		this.ranges.add(range);
 	}
 	
-	public BigInteger getDestination(BigInteger source) {
-		BigInteger destination = new BigInteger(source.toString());
+	public long getDestination(long source) {
+		long destination = source;
 		for(Range range : ranges) {
 			if(range.isInRange(source)) {
 				//System.out.println(String.format("%d in range %s", source, range));
