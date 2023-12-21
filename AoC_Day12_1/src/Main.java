@@ -43,8 +43,13 @@ public class Main {
 			done.addAll(ready);
 			
 			BigInteger currentSum = getSum(done);
-			//System.out.println(String.format("todo: %4d  running: %4d  done: %4d  (%d)", resolvers.size(), running.size(), done.size(), currentSum));
+			System.out.println(String.format("todo: %4d  running: %4d  done: %4d  (%d)", resolvers.size(), running.size(), done.size(), currentSum));
 			
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		BigInteger result = getSum(done);

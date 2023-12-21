@@ -57,7 +57,12 @@ public class WasteLand {
 		return linesAbove > 0;
 	}
 
+	
 	public void done() {
+		this.done(false, false, 0);
+	}
+	
+	public void done(boolean ignore, boolean vertical, int index) {
 		for (int y = 0; y < this.height; y++) {
 			String bin = "";
 			for (int x = 0; x < this.width; x++) {
@@ -75,14 +80,18 @@ public class WasteLand {
 		}
 //		System.out.println(this.colValues);
 
-		this.findMirrors();
+		this.findMirrors(ignore, vertical, index);
 	}
 
-	public void findMirrors() {
+	public void findMirrors(boolean ignore, boolean vertical, int index) {
 		Map<Integer, Boolean> mirrorMap = new HashMap<>();
 		for (int y = 0; y < this.height; y++) {
 			mirrorMap.put(y, true);
 		}
+		
+		if(ignore && !vertical)
+			mirrorMap.put(index, false);
+		
 		mirrorMap.put(this.height - 1, false);
 		for (int y = 0; y < this.height - 1; y++) {
 			if (!this.rowValues.get(y).equals(this.rowValues.get(y + 1))) {
@@ -106,6 +115,10 @@ public class WasteLand {
 		for (int x = 0; x < this.width; x++) {
 			mirrorMap.put(x, true);
 		}
+		
+		if(ignore && vertical)
+			mirrorMap.put(index, false);
+		
 		mirrorMap.put(this.width - 1, false);
 		for (int x = 0; x < this.width - 1; x++) {
 			if (!this.colValues.get(x).equals(this.colValues.get(x + 1))) {
@@ -149,6 +162,19 @@ public class WasteLand {
 	public String toString() {
 		return "WasteLand [tiles=" + tiles + ", width=" + width + ", height=" + height + ", rowValues=" + rowValues
 				+ "]";
+	}
+	
+	public void print() {
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~");
+		for(int y=0; y<this.height; y++) {
+			char[] lineArr = new char[this.width];
+			for(int x=0; x<this.width; x++) {
+				lineArr[x] = this.getTile(x, y).getType().getSymbol();
+			}
+			System.out.println(new String(lineArr));
+		}
+		System.out.println("=========================");
+		System.out.println();
 	}
 
 }

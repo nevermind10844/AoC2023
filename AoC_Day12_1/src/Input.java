@@ -27,34 +27,46 @@ public class Input {
 	public List<CorrectionBlock> getCorrectionBlocks() {
 		return correctionBlocks;
 	}
-	
-	public void doubleBlocks() {
+
+	public void stackBlocks(int finalStackSize) {
 		int currentSize = this.correctionBlocks.size();
-		for(int i=0; i<currentSize; i++) {
-			int blockSize = this.getCorrectionBlocks().get(i).getBlockSize();
-			CorrectionBlock block = new CorrectionBlock(i + currentSize, false, blockSize);
-			this.addCorrectionBlock(block);
+		for (int j = 1; j < finalStackSize; j++) {
+			for (int i = 0; i < currentSize; i++) {
+				int blockSize = this.getCorrectionBlocks().get(i).getBlockSize();
+				CorrectionBlock block = new CorrectionBlock(i + (currentSize * j), false, blockSize);
+				this.addCorrectionBlock(block);
+			}
 		}
 	}
-	
+
 	public Pattern getPattern() {
 		return this.pattern;
 	}
-	
+
 	public int getRemainingPositionCount(int index) {
 		return this.remainders.get(index);
 	}
-	
+
 	public void addCorrectionBlock(CorrectionBlock block) {
 		this.correctionBlocks.add(block);
 	}
-	
+
 	public String getCorrectionBlocksAsString() {
 		List<String> blockSizes = new ArrayList<>();
-		for (int i=0; i<this.correctionBlocks.size(); i++) {
+		for (int i = 0; i < this.correctionBlocks.size(); i++) {
 			blockSizes.add(this.correctionBlocks.get(i).getBlockSize() + "");
 		}
 		return String.join(",", blockSizes);
+	}
+	
+	public void preProcess() {
+		for (int i = 0; i < this.correctionBlocks.size(); i++) {
+			int sum = 0;
+			for(int y=i; y<this.correctionBlocks.size(); y++) {
+				sum += this.correctionBlocks.get(y).getBlockSize();
+			}
+			this.remainders.put(i, sum);
+		}
 	}
 
 	@Override

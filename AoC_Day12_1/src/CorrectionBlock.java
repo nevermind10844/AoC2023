@@ -1,4 +1,4 @@
-public class CorrectionBlock{
+public class CorrectionBlock {
 	private int position;
 	private boolean placed;
 	private int blockSize;
@@ -10,8 +10,8 @@ public class CorrectionBlock{
 		this.position = position;
 		this.placed = placed;
 		this.blockSize = blockSize;
-		this.replacementCharacter = (char)(65+position);
-		
+		this.replacementCharacter = (char) (position > 25 ? (97 + position - 26) : (65 + position));
+
 		char[] chars = new char[this.blockSize];
 		for (int i = 0; i < this.blockSize; i++) {
 			chars[i] = this.replacementCharacter;
@@ -19,7 +19,7 @@ public class CorrectionBlock{
 		this.replacementString = String.valueOf(chars);
 		this.pattern = String.format("(?=.*%s)", this.replacementCharacter);
 	}
-	
+
 	public String getPattern() {
 		return this.pattern;
 	}
@@ -51,7 +51,7 @@ public class CorrectionBlock{
 	public char getReplacementCharacter() {
 		return replacementCharacter;
 	}
-	
+
 	public String getString() {
 		return this.replacementString;
 	}

@@ -1,40 +1,45 @@
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Resolver extends Thread {
 	private Thread t;
 	private Input input;
 	private BigInteger result;
 
+	private Map<String, Boolean> mappingTable;
+
 	private int correctionBlockSize;
 
 	private boolean done;
+
+	private static int STACKS = 5;
 
 	Resolver(Input input) {
 		this.input = input;
 		this.result = BigInteger.ZERO;
 		this.done = false;
 		this.correctionBlockSize = this.input.getCorrectionBlocks().size();
+		mappingTable = new HashMap<>();
 	}
 
 	public void run() {
-		this.resolve(this.input.getFaultyData(), 0, 0);
-		BigInteger firstResult = this.result;
-		
 		this.result = BigInteger.ZERO;
-		
-		this.input.setFaultyData(this.input.getFaultyData() + "?" + this.input.getFaultyData());
-		this.input.doubleBlocks();
+
+		String faultyData = this.input.getFaultyData();
+		for (int i = 0; i < STACKS - 1; i++) {
+			this.input.setFaultyData(this.input.getFaultyData() + "?" + faultyData);
+		}
+		this.input.stackBlocks(STACKS);
 		this.correctionBlockSize = this.input.getCorrectionBlocks().size();
-		
+
+		this.input.preProcess();
+
 		this.resolve(this.input.getFaultyData(), 0, 0);
 		BigInteger secondResult = this.result;
-		
-		BigInteger factor = secondResult.divide(firstResult);
-		
-		this.result = firstResult.multiply(factor).multiply(factor).multiply(factor).multiply(factor);
-		
-		System.out.println(String.format("first: %d    second: %d    factor: %d    result: %d", firstResult, secondResult, factor, result));
-		
+
+		System.out.println(String.format("result: %d", secondResult));
+
 		this.done = true;
 	}
 
@@ -55,14 +60,21 @@ public class Resolver extends Thread {
 				CorrectionBlock block = input.correctionBlocks.get(i);
 				for (int j = start; j < currentData.length(); j++) {
 					if (this.valid(currentData, j)) {
-						if (this.blockFits(currentData, j, block.getString())) {
-							String result = replace(currentData, j, block.getString());
-							if (i == this.correctionBlockSize - 1) {
-								if (!result.contains("#") && containsAllBlocks(result)) {
-									this.result = this.result.add(BigInteger.ONE);
+						String remaining = currentData.substring(j);
+						if (remaining.replaceAll(" ", "").length() < this.input.getRemainingPositionCount(i)) {
+							chainBroken = true;
+							break;
+						} else {
+							if (this.blockFits(currentData, j, block.getString())) {
+								String result = replace(currentData, j, block.getString());
+								if (i == this.correctionBlockSize - 1) {
+									if (!result.contains("#") && containsAllBlocks(result)) {
+										this.result = this.result.add(BigInteger.ONE);
+										// System.out.println(result);
+									}
+								} else {
+									resolve(result, j + block.getBlockSize() + 1, i + 1);
 								}
-							} else {
-								resolve(result, j + block.getBlockSize() + 1, i + 1);
 							}
 						}
 					} else {
@@ -93,29 +105,52 @@ public class Resolver extends Thread {
 	}
 
 	private boolean blockFits(String currentData, int position, String toFit) {
+		boolean fits = true;
+
 		if (position + toFit.length() > currentData.length())
-			return false;
+			fits = false;
 
-		if (position < currentData.length() - toFit.length()) {
-			char c = currentData.charAt(position + toFit.length());
-			if (c != '?' && c != '.')
-				return false;
-		}
+		String key = null;
 
-		if (position > 0) {
-			char c = currentData.charAt(position - 1);
-			if (c != '?' && c != '.')
-				return false;
-		}
-
-		for (int i = position; i < toFit.length() + position; i++) {
-			char c = currentData.charAt(i);
-			if (c != '#' && c != '?') {
-				return false;
+		if (fits && position > 0 && position + toFit.length() < currentData.length() - 1) {
+			key = currentData.substring(position - 1, position + toFit.length() + 1) + "::" + toFit.length();
+			Boolean mappedValue = mappingTable.get(key);
+			if (mappedValue != null) {
+//				System.out.println(
+//						String.format("key %s from map: %b   mapSize: %d", key, mappedValue, mappingTable.size()));
+				return mappedValue;
 			}
 		}
 
-		return true;
+		if (fits && position < currentData.length() - toFit.length()) {
+			char c = currentData.charAt(position + toFit.length());
+			if (c != '?' && c != '.') {
+				fits = false;
+			}
+		}
+
+		if (fits && position > 0) {
+			char c = currentData.charAt(position - 1);
+			if (c != '?' && c != '.') {
+				fits = false;
+			}
+		}
+
+		if (fits) {
+			for (int i = position; i < toFit.length() + position; i++) {
+				char c = currentData.charAt(i);
+				if (c != '#' && c != '?') {
+					fits = false;
+					break;
+				}
+			}
+		}
+
+		if (position > 0 && position + toFit.length() < currentData.length() - 1) {
+			mappingTable.put(key, fits);
+		}
+
+		return fits;
 	}
 
 	private String replace(String currentData, int position, String toReplace) {
