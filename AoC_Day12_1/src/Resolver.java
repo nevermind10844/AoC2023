@@ -1,11 +1,10 @@
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Resolver extends Thread {
 	private Thread t;
 	private Input input;
-	private BigInteger result;
+	private long result;
 
 	private Map<String, Boolean> mappingTable;
 
@@ -17,14 +16,14 @@ public class Resolver extends Thread {
 
 	Resolver(Input input) {
 		this.input = input;
-		this.result = BigInteger.ZERO;
+		this.result = 0L;
 		this.done = false;
 		this.correctionBlockSize = this.input.getCorrectionBlocks().size();
 		mappingTable = new HashMap<>();
 	}
 
 	public void run() {
-		this.result = BigInteger.ZERO;
+		this.result = 0L;
 
 		String faultyData = this.input.getFaultyData();
 		for (int i = 0; i < STACKS - 1; i++) {
@@ -36,7 +35,7 @@ public class Resolver extends Thread {
 		this.input.preProcess();
 
 		this.resolve(this.input.getFaultyData(), 0, 0);
-		BigInteger secondResult = this.result;
+		Long secondResult = this.result;
 
 		System.out.println(String.format("result: %d", secondResult));
 
@@ -47,7 +46,7 @@ public class Resolver extends Thread {
 		return this.done;
 	}
 
-	public BigInteger getResult() {
+	public Long getResult() {
 		return this.result;
 	}
 
@@ -61,7 +60,7 @@ public class Resolver extends Thread {
 				for (int j = start; j < currentData.length(); j++) {
 					if (this.valid(currentData, j)) {
 						String remaining = currentData.substring(j);
-						if (remaining.replaceAll(" ", "").length() < this.input.getRemainingPositionCount(i)) {
+						if (remaining.replaceAll("/.", "").length() < this.input.getRemainingPositionCount(i)) {
 							chainBroken = true;
 							break;
 						} else {
@@ -69,7 +68,7 @@ public class Resolver extends Thread {
 								String result = replace(currentData, j, block.getString());
 								if (i == this.correctionBlockSize - 1) {
 									if (!result.contains("#") && containsAllBlocks(result)) {
-										this.result = this.result.add(BigInteger.ONE);
+										this.result++;
 										// System.out.println(result);
 									}
 								} else {

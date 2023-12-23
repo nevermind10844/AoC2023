@@ -1,4 +1,3 @@
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +41,7 @@ public class Main {
 			running.removeAll(ready);
 			done.addAll(ready);
 			
-			BigInteger currentSum = getSum(done);
+			long currentSum = getSum(done);
 			System.out.println(String.format("todo: %4d  running: %4d  done: %4d  (%d)", resolvers.size(), running.size(), done.size(), currentSum));
 			
 			try {
@@ -52,15 +51,15 @@ public class Main {
 			}
 		}
 		
-		BigInteger result = getSum(done);
+		long result = getSum(done);
 		System.out.println("final: " + result);
 	}
 	
-	private static BigInteger getSum(List<Resolver> resolvers) {
-		BigInteger currentSum = BigInteger.ZERO;
-		List<BigInteger> resultList = resolvers.stream().map(item -> item.getResult()).toList();
-		for (BigInteger result : resultList) {
-			currentSum = currentSum.add(result);
+	private static long getSum(List<Resolver> resolvers) {
+		long currentSum = 0L;
+		List<Long> resultList = resolvers.stream().map(item -> item.getResult()).toList();
+		for (long result : resultList) {
+			currentSum += result;
 		}
 		return currentSum;
 	}
