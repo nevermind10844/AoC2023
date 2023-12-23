@@ -129,9 +129,9 @@ public class Resolver extends Thread {
 		if (notFirst && notLast) {
 			key = currentData.substring(position - 1, position + length + 1) + "::" + length;
 			Boolean mappedValue = null;
-			mappedValue = globalMappingTable.get(key);
+			mappedValue = mappingTable.get(key);
 			if (mappedValue == null)
-				mappedValue = mappingTable.get(key);
+				mappedValue = globalMappingTable.get(key);
 			if (mappedValue != null) {
 				return mappedValue;
 			}
@@ -151,7 +151,7 @@ public class Resolver extends Thread {
 		if (notFirst) {
 			char c = data[position - 1];
 			if (c != '?' && c != '.') {
-				if (notFirst && notLast)
+				if (notLast)
 					mappingTable.put(key, false);
 				return false;
 			}
