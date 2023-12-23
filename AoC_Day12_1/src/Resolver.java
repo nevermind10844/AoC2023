@@ -65,24 +65,25 @@ public class Resolver extends Thread {
 			if (chainBroken) {
 				break;
 			} else {
-				CorrectionBlock block = input.correctionBlocks.get(i);
 				for (int j = start; j < currentData.length(); j++) {
 					if (this.valid(currentData, j)) {
 						if (this.input.getRemainingWithoutsDots(j) < this.input.getRemainingPositionCount(i)) {
 							chainBroken = true;
 							break;
 						} else {
-							if (this.blockFits(currentData, j, block.getString())) {
+							CorrectionBlock block = input.correctionBlocks.get(i);
+							if (this.blockFits(currentData, j, block.getBlockSize())) {
 								String result = replace(currentData, j, block.getString());
 								if (i == this.correctionBlockSize - 1) {
 									if (!result.contains("#") && containsAllBlocks(result)) {
 										this.result++;
-										// System.out.println(result);
+//										System.out.println(result);
 									} else {
 										chainBroken = true;
 										break;
 									}
 								} else {
+									// System.out.println(result);
 									resolve(result, j + block.getBlockSize() + 1, i + 1);
 								}
 							}
@@ -114,57 +115,61 @@ public class Resolver extends Thread {
 			return true;
 	}
 
-	private boolean blockFits(String currentData, int position, String toFit) {
-		boolean fits = true;
+	private boolean blockFits(String currentData, int position, int length) {
+		int currentDataLength = currentData.length();
 
-		if (position + toFit.length() > currentData.length())
-			fits = false;
+		if (position + length > currentDataLength)
+			return false;
+
+		boolean notFirst = position > 0;
+		boolean notLast = position + length < currentDataLength - 1;
 
 		String key = null;
 
-		if (fits && position > 0 && position + toFit.length() < currentData.length() - 1) {
-			key = currentData.substring(position - 1, position + toFit.length() + 1) + "::" + toFit.length();
-			Boolean mappedValue = globalMappingTable.get(key);
+		if (notFirst && notLast) {
+			key = currentData.substring(position - 1, position + length + 1) + "::" + length;
+			Boolean mappedValue = null;
+			mappedValue = globalMappingTable.get(key);
 			if (mappedValue == null)
 				mappedValue = mappingTable.get(key);
 			if (mappedValue != null) {
-//				System.out.println(
-//						String.format("key %s from map: %b   mapSize: %d", key, mappedValue, mappingTable.size()));
 				return mappedValue;
 			}
 		}
 
 		char[] data = currentData.toCharArray();
 
-		if (fits && position < currentData.length() - toFit.length()) {
-			char c = data[position + toFit.length()];
+		if (position < currentDataLength - length) {
+			char c = data[position + length];
 			if (c != '?' && c != '.') {
-				fits = false;
+				if (notFirst && notLast)
+					mappingTable.put(key, false);
+				return false;
 			}
 		}
 
-		if (fits && position > 0) {
+		if (notFirst) {
 			char c = data[position - 1];
 			if (c != '?' && c != '.') {
-				fits = false;
+				if (notFirst && notLast)
+					mappingTable.put(key, false);
+				return false;
 			}
 		}
 
-		if (fits) {
-			for (int i = position; i < toFit.length() + position; i++) {
-				char c = data[i];
-				if (c != '#' && c != '?') {
-					fits = false;
-					break;
-				}
+		for (int i = position; i < length + position; i++) {
+			char c = data[i];
+			if (c != '#' && c != '?') {
+				if (notFirst && notLast)
+					mappingTable.put(key, false);
+				return false;
 			}
 		}
 
-		if (position > 0 && position + toFit.length() < currentData.length() - 1) {
-			mappingTable.put(key, fits);
-		}
+		if (notFirst && notLast)
+			mappingTable.put(key, true);
 
-		return fits;
+		return true;
 	}
 
 	private String replace(String currentData, int position, String toReplace) {

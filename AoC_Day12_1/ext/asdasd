@@ -1,6 +1,9 @@
-???.### 1,1,3
-.??..??...?##. 1,1,3
-?#?#?#?#?#?#?#? 1,3,1,6
-????.#...#... 4,1,1
-????.######..#####. 1,6,5
-?###???????? 3,2,1
+time to 111: 91,764000	//baseline
+time to 111: 102,737999 //without containsAllBlocks
+time to 111: ???		//without this.valid: not viable; took too long to measure
+time to 111: ???		//without remaining: not viable; took too long to measure
+time to 111: 91,819000  //without checking global map
+time to 111: 92,211998  //without checking local map
+time to 111: 93,015999	//without checking ANY map;
+time to 111: 90,815002  //without checking AND filling map; maybe map is a waste of time?!
+time to 111: 90,858002  //with some optimization for the mapping; should get more effective to the end! keeping it!
