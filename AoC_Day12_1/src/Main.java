@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Main {
 
@@ -8,6 +10,7 @@ public class Main {
 		List<Resolver> resolvers = new ArrayList<>();
 		List<Resolver> running = new ArrayList<>();
 		List<Resolver> done = new ArrayList<>();
+		Map<String, Boolean> globalMappingTable = new HashMap<>(0);
 
 		for (String line : strings) {
 			Input input = new Input();
@@ -33,11 +36,19 @@ public class Main {
 		while(done.size() < numResolvers) {
 			if(resolvers.size() > 0 && running.size() < maxThreads) {
 				Resolver r = resolvers.get(0);
+				r.setGlobalMappingTable(globalMappingTable);
 				running.add(r);
 				resolvers.remove(r);
 				r.start();
 			}
 			List<Resolver> ready = running.stream().filter(r -> r.isDone()).toList();
+			
+			for (Resolver resolver : ready) {
+				Map<String, Boolean> mappingTable = resolver.getMappingTable();
+				globalMappingTable.putAll(mappingTable);
+				System.out.println(String.format("mappingTableSize: %d", globalMappingTable.size()));
+			}
+			
 			running.removeAll(ready);
 			done.addAll(ready);
 			

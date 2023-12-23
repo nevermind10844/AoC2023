@@ -7,6 +7,7 @@ public class Resolver extends Thread {
 	private long result;
 
 	private Map<String, Boolean> mappingTable;
+	private Map<String, Boolean> globalMappingTable;
 
 	private int correctionBlockSize;
 
@@ -20,6 +21,14 @@ public class Resolver extends Thread {
 		this.done = false;
 		this.correctionBlockSize = this.input.getCorrectionBlocks().size();
 		mappingTable = new HashMap<>();
+	}
+
+	public void setGlobalMappingTable(Map<String, Boolean> globalMappingTable) {
+		this.globalMappingTable = globalMappingTable;
+	}
+
+	public Map<String, Boolean> getMappingTable() {
+		return this.mappingTable;
 	}
 
 	public void run() {
@@ -59,8 +68,7 @@ public class Resolver extends Thread {
 				CorrectionBlock block = input.correctionBlocks.get(i);
 				for (int j = start; j < currentData.length(); j++) {
 					if (this.valid(currentData, j)) {
-						String remaining = currentData.substring(j);
-						if (remaining.replaceAll("/.", "").length() < this.input.getRemainingPositionCount(i)) {
+						if (this.input.getRemainingWithoutsDots(j) < this.input.getRemainingPositionCount(i)) {
 							chainBroken = true;
 							break;
 						} else {
@@ -70,6 +78,9 @@ public class Resolver extends Thread {
 									if (!result.contains("#") && containsAllBlocks(result)) {
 										this.result++;
 										// System.out.println(result);
+									} else {
+										chainBroken = true;
+										break;
 									}
 								} else {
 									resolve(result, j + block.getBlockSize() + 1, i + 1);
@@ -113,7 +124,9 @@ public class Resolver extends Thread {
 
 		if (fits && position > 0 && position + toFit.length() < currentData.length() - 1) {
 			key = currentData.substring(position - 1, position + toFit.length() + 1) + "::" + toFit.length();
-			Boolean mappedValue = mappingTable.get(key);
+			Boolean mappedValue = globalMappingTable.get(key);
+			if (mappedValue == null)
+				mappedValue = mappingTable.get(key);
 			if (mappedValue != null) {
 //				System.out.println(
 //						String.format("key %s from map: %b   mapSize: %d", key, mappedValue, mappingTable.size()));
@@ -121,15 +134,17 @@ public class Resolver extends Thread {
 			}
 		}
 
+		char[] data = currentData.toCharArray();
+
 		if (fits && position < currentData.length() - toFit.length()) {
-			char c = currentData.charAt(position + toFit.length());
+			char c = data[position + toFit.length()];
 			if (c != '?' && c != '.') {
 				fits = false;
 			}
 		}
 
 		if (fits && position > 0) {
-			char c = currentData.charAt(position - 1);
+			char c = data[position - 1];
 			if (c != '?' && c != '.') {
 				fits = false;
 			}
@@ -137,7 +152,7 @@ public class Resolver extends Thread {
 
 		if (fits) {
 			for (int i = position; i < toFit.length() + position; i++) {
-				char c = currentData.charAt(i);
+				char c = data[i];
 				if (c != '#' && c != '?') {
 					fits = false;
 					break;

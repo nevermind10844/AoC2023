@@ -9,11 +9,13 @@ public class Input {
 	List<CorrectionBlock> correctionBlocks;
 	private Pattern pattern;
 	private Map<Integer, Integer> remainders;
+	private Map<Integer, Integer> remainingWithoutDots;
 
 	public Input() {
 		this.faultyData = null;
 		this.correctionBlocks = new ArrayList<>();
-		remainders = new HashMap<>();
+		this.remainders = new HashMap<>();
+		this.remainingWithoutDots = new HashMap<>();
 	}
 
 	public String getFaultyData() {
@@ -50,6 +52,10 @@ public class Input {
 	public void addCorrectionBlock(CorrectionBlock block) {
 		this.correctionBlocks.add(block);
 	}
+	
+	public int getRemainingWithoutsDots(int index) {
+		return this.remainingWithoutDots.get(index);
+	}
 
 	public String getCorrectionBlocksAsString() {
 		List<String> blockSizes = new ArrayList<>();
@@ -66,6 +72,10 @@ public class Input {
 				sum += this.correctionBlocks.get(y).getBlockSize();
 			}
 			this.remainders.put(i, sum);
+		}
+		
+		for(int i=0; i< this.faultyData.length(); i++) {
+			this.remainingWithoutDots.put(i, this.faultyData.substring(i).replace("/.", "").length());
 		}
 	}
 
