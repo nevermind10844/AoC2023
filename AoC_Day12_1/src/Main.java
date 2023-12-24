@@ -44,6 +44,7 @@ public class Main {
 				resolvers.remove(r);
 				r.start();
 			}
+
 			List<Resolver> ready = running.stream().filter(r -> r.isDone()).toList();
 
 			for (Resolver resolver : ready) {
@@ -55,9 +56,9 @@ public class Main {
 			running.removeAll(ready);
 			done.addAll(ready);
 			
-			if (!measured && done.size() >= 111) {
+			if (!measured && done.size() >= 116) {
 				long end = System.currentTimeMillis();
-				System.err.println(String.format("time to 111: %f", (end - start) / 1000f));
+				System.err.println(String.format("time to 116: %f", (end - start) / 1000f));
 				measured = true;
 			}
 

@@ -44,9 +44,8 @@ public class Resolver extends Thread {
 		this.input.preProcess();
 
 		this.resolve(this.input.getFaultyData(), 0, 0);
-		Long secondResult = this.result;
 
-		System.out.println(String.format("result: %d", secondResult));
+		System.out.println(String.format("result: %d", this.result));
 
 		this.done = true;
 	}
@@ -67,7 +66,7 @@ public class Resolver extends Thread {
 			} else {
 				for (int j = start; j < currentData.length(); j++) {
 					if (this.valid(currentData, j)) {
-						if (this.input.getRemainingWithoutsDots(j) < this.input.getRemainingPositionCount(i)) {
+						if (this.input.getRemainingCharacters(j) < this.input.getRemainingBlockSizes(i)) {
 							chainBroken = true;
 							break;
 						} else {
@@ -75,15 +74,8 @@ public class Resolver extends Thread {
 							if (this.blockFits(currentData, j, block.getBlockSize())) {
 								String result = replace(currentData, j, block.getString());
 								if (i == this.correctionBlockSize - 1) {
-									if (!result.contains("#") && containsAllBlocks(result)) {
-										this.result++;
-//										System.out.println(result);
-									} else {
-										chainBroken = true;
-										break;
-									}
+									this.result++;
 								} else {
-									// System.out.println(result);
 									resolve(result, j + block.getBlockSize() + 1, i + 1);
 								}
 							}
@@ -95,17 +87,6 @@ public class Resolver extends Thread {
 				}
 			}
 		}
-	}
-
-	private boolean containsAllBlocks(String s) {
-		boolean containsAllBlocks = true;
-		for (CorrectionBlock block : this.input.getCorrectionBlocks()) {
-			if (!s.contains(block.getString())) {
-				containsAllBlocks = false;
-				break;
-			}
-		}
-		return containsAllBlocks;
 	}
 
 	private boolean valid(String currentData, int position) {
@@ -129,9 +110,9 @@ public class Resolver extends Thread {
 		if (notFirst && notLast) {
 			key = currentData.substring(position - 1, position + length + 1) + "::" + length;
 			Boolean mappedValue = null;
-			mappedValue = mappingTable.get(key);
+			mappedValue = globalMappingTable.get(key);
 			if (mappedValue == null)
-				mappedValue = globalMappingTable.get(key);
+				mappedValue = mappingTable.get(key);
 			if (mappedValue != null) {
 				return mappedValue;
 			}

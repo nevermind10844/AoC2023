@@ -8,14 +8,14 @@ public class Input {
 	private String faultyData;
 	List<CorrectionBlock> correctionBlocks;
 	private Pattern pattern;
-	private Map<Integer, Integer> remainders;
-	private Map<Integer, Integer> remainingWithoutDots;
+	private Map<Integer, Integer> remainingBlockSizes;
+	private Map<Integer, Integer> remainingCharacters;
 
 	public Input() {
 		this.faultyData = null;
 		this.correctionBlocks = new ArrayList<>();
-		this.remainders = new HashMap<>();
-		this.remainingWithoutDots = new HashMap<>();
+		this.remainingBlockSizes = new HashMap<>();
+		this.remainingCharacters = new HashMap<>();
 	}
 
 	public String getFaultyData() {
@@ -45,16 +45,16 @@ public class Input {
 		return this.pattern;
 	}
 
-	public int getRemainingPositionCount(int index) {
-		return this.remainders.get(index);
+	public int getRemainingBlockSizes(int index) {
+		return this.remainingBlockSizes.get(index);
 	}
 
 	public void addCorrectionBlock(CorrectionBlock block) {
 		this.correctionBlocks.add(block);
 	}
 	
-	public int getRemainingWithoutsDots(int index) {
-		return this.remainingWithoutDots.get(index);
+	public int getRemainingCharacters(int index) {
+		return this.remainingCharacters.get(index);
 	}
 
 	public String getCorrectionBlocksAsString() {
@@ -69,13 +69,15 @@ public class Input {
 		for (int i = 0; i < this.correctionBlocks.size(); i++) {
 			int sum = 0;
 			for(int y=i; y<this.correctionBlocks.size(); y++) {
+				if(sum != 0)
+					sum +=1;
 				sum += this.correctionBlocks.get(y).getBlockSize();
 			}
-			this.remainders.put(i, sum);
+			this.remainingBlockSizes.put(i, sum);
 		}
 		
 		for(int i=0; i< this.faultyData.length(); i++) {
-			this.remainingWithoutDots.put(i, this.faultyData.substring(i).replace("/.", "").length());
+			this.remainingCharacters.put(i, this.faultyData.substring(i).length());
 		}
 	}
 
