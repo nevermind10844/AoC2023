@@ -10,7 +10,6 @@ public class Main {
 		List<Resolver> resolvers = new ArrayList<>();
 		List<Resolver> running = new ArrayList<>();
 		List<Resolver> done = new ArrayList<>();
-		Map<String, Boolean> globalValidReplacements = new HashMap<>();
 
 		for (String line : strings) {
 			Input input = new Input();
@@ -39,7 +38,6 @@ public class Main {
 		while (done.size() < numResolvers) {
 			if (resolvers.size() > 0 && running.size() < maxThreads) {
 				Resolver r = resolvers.get(0);
-				r.setGlobalValidReplacements(globalValidReplacements);
 				running.add(r);
 				resolvers.remove(r);
 				r.start();
@@ -47,10 +45,6 @@ public class Main {
 
 			List<Resolver> ready = running.stream().filter(r -> r.isDone()).toList();
 			running.removeAll(ready);
-
-//			for (Resolver res: ready) {
-//				globalValidReplacements.putAll(res.getLocalValidReplacements());
-//			}
 			
 			done.addAll(ready);
 			

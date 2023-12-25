@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Resolver extends Thread {
@@ -6,11 +8,11 @@ public class Resolver extends Thread {
 	private Input input;
 	private long result;
 
-	private Map<String, Boolean> mappingTable;
-	private Map<String, Boolean> globalMappingTable;
-
 	private int correctionBlockSize;
-
+	
+	private Map<String, Boolean> globalValidReplacements;
+	private List<String> localValidReplacements;
+	
 	private boolean done;
 
 	private static int STACKS = 5;
@@ -20,15 +22,7 @@ public class Resolver extends Thread {
 		this.result = 0L;
 		this.done = false;
 		this.correctionBlockSize = this.input.getCorrectionBlocks().size();
-		mappingTable = new HashMap<>();
-	}
-
-	public void setGlobalMappingTable(Map<String, Boolean> globalMappingTable) {
-		this.globalMappingTable = globalMappingTable;
-	}
-
-	public Map<String, Boolean> getMappingTable() {
-		return this.mappingTable;
+		this.localValidReplacements = new ArrayList<>();
 	}
 
 	public void run() {
@@ -48,6 +42,14 @@ public class Resolver extends Thread {
 		System.out.println(String.format("result: %d", this.result));
 
 		this.done = true;
+	}
+
+	public List<String> getLocalValidReplacements() {
+		return localValidReplacements;
+	}
+
+	public void setGlobalValidReplacements(Map<String, Boolean> globalValidReplacements) {
+		this.globalValidReplacements = globalValidReplacements;
 	}
 
 	public boolean isDone() {
@@ -97,58 +99,51 @@ public class Resolver extends Thread {
 	}
 
 	private boolean blockFits(String currentData, int position, int length) {
+		//precalculating some values
 		int currentDataLength = currentData.length();
-
-		if (position + length > currentDataLength)
-			return false;
-
 		boolean notFirst = position > 0;
 		boolean notLast = position + length < currentDataLength - 1;
+		int precalcLength = length + position;
 
 		String key = null;
 
+		//checking map first
 		if (notFirst && notLast) {
-			key = currentData.substring(position - 1, position + length + 1) + "::" + length;
-			Boolean mappedValue = null;
-			mappedValue = globalMappingTable.get(key);
-			if (mappedValue == null)
-				mappedValue = mappingTable.get(key);
-			if (mappedValue != null) {
-				return mappedValue;
-			}
+			key = currentData.substring(position - 1, precalcLength + 1) + ":" + length;
+			boolean contains = this.localValidReplacements.contains(key);
+			if (contains)
+				return true;
 		}
 
 		char[] data = currentData.toCharArray();
 
-		if (position < currentDataLength - length) {
-			char c = data[position + length];
-			if (c != '?' && c != '.') {
-				if (notFirst && notLast)
-					mappingTable.put(key, false);
+		//checking characters spanning the block
+		for (int i = position; i < precalcLength; i++) {
+			char c = data[i];
+			if (c != '#' && c != '?') {
 				return false;
 			}
 		}
 
+		//checking character after
+		if (position < currentDataLength - length) {
+			char c = data[precalcLength];
+			if (c != '?' && c != '.') {
+				return false;
+			}
+		}
+
+		//checking character before
 		if (notFirst) {
 			char c = data[position - 1];
 			if (c != '?' && c != '.') {
-				if (notLast)
-					mappingTable.put(key, false);
 				return false;
 			}
 		}
 
-		for (int i = position; i < length + position; i++) {
-			char c = data[i];
-			if (c != '#' && c != '?') {
-				if (notFirst && notLast)
-					mappingTable.put(key, false);
-				return false;
-			}
-		}
-
+		//adding valid placement to map and returning true
 		if (notFirst && notLast)
-			mappingTable.put(key, true);
+			this.localValidReplacements.add(key);
 
 		return true;
 	}

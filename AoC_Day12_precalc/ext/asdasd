@@ -1,0 +1,13 @@
+...
+time to 111:   25,221001 //using an ArrayList instead and only checking for contains. therefore only holding fitting items there!
+time to 111:   25,917999 //same thing with map; list seems to be slightly faster.
+						 //list seems to struggle as they get bigger
+						 //testing for 200 lines now to see if global MAP or local LIST is better!
+time to 200: 1460,806030 //local list
+time to 111:   20,021999 //precalculating ALL possible entries except for bordering first and last position!
+time to 111:   20,104000 //removed all the other maps!
+time to 200: 1169,098999 //way better!
+time to 111:   19,344000 //validation before next resolve call is made
+time to 200: 1011,655029 //a bit better
+time to 111:   16,478001 //not replacing the string content anymore. now able to hold it as a char-array where access is way faster
+time to 200:  321,917999 //fastest so far. that was a huge improvement. should only take "some" hours now instead of some days...
