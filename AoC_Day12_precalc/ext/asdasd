@@ -1,9 +1,25 @@
-...
+time to 111:   91,764000 //baseline
+time to 111:  102,737999 //without containsAllBlocks
+time to 111:         ??? //without this.valid: not viable; took too long to measure
+time to 111:         ??? //without remaining: not viable; took too long to measure
+time to 111:   91,819000 //without checking global map
+time to 111:   92,211998 //without checking local map
+time to 111:   93,015999 //without checking ANY map;
+time to 111:   90,815002 //without checking AND filling map; maybe map is a waste of time?!
+time to 111:   90,858002 //with some optimization for the mapping; should get more effective to the end! keeping it!
+time to 111:   29,153000 //don't ignore dots in remaining space evaluation!!!
+time to 116:   37,458000 //nothing but goal changed!
+time to  12: 			 //trying to find the hard ones! took too long tested them on their own; #????????.#?#?????? 2,1,1,5,1 seems t be a long running line!
+time to   1:   488,54000 //for line mentioned above
+time to 116:   31,656000 //looping every 100ms to fill up queue faster; not really a performance boost over long sets ofc!
+time to   1:   317,00100 //changed order of checks in main validation function.
+time to 111:  102,599998 //with a custom object as key: not that good :D
 time to 111:   25,221001 //using an ArrayList instead and only checking for contains. therefore only holding fitting items there!
 time to 111:   25,917999 //same thing with map; list seems to be slightly faster.
 						 //list seems to struggle as they get bigger
 						 //testing for 200 lines now to see if global MAP or local LIST is better!
-time to 200: 1460,806030 //local list
+time to 200: 1486,875000 //global map
+time to 200: 1460,806030 //local list 
 time to 111:   20,021999 //precalculating ALL possible entries except for bordering first and last position!
 time to 111:   20,104000 //removed all the other maps!
 time to 200: 1169,098999 //way better!
