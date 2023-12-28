@@ -7,8 +7,7 @@ public class Platform {
 	private List<Rock> rocks = null;
 	private List<Rock> roundRocks = null;
 	private List<Rock> squareRocks = null;
-	private Map<Integer, List<Rock>> verticalSquareRockMap;
-	private Map<Integer, List<Rock>> horizontalSquareRockMap;
+	private List<Rock> artificialRocks = null;
 	private int width;
 	private int height;
 
@@ -16,8 +15,7 @@ public class Platform {
 		this.rocks = new ArrayList<>();
 		this.roundRocks = new ArrayList<>();
 		this.squareRocks = new ArrayList<>();
-		this.verticalSquareRockMap = new HashMap<>(this.width);
-		this.horizontalSquareRockMap = new HashMap<>(this.width);
+		this.artificialRocks = new ArrayList<>();
 		this.width = 0;
 		this.height = 0;
 	}
@@ -49,86 +47,111 @@ public class Platform {
 	}
 
 	public void done() {
-		for (int x = 0; x < this.width; x++) {
-			int realX = x;
-			this.verticalSquareRockMap.put(x, this.squareRocks.stream().filter(rock -> rock.getPosX() == realX)
-					.sorted((a, b) -> a.getPosY() > b.getPosY() ? 1 : -1).toList());
-		}
-		for (int y = 0; y < this.width; y++) {
-			int realY = y;
-			this.verticalSquareRockMap.put(y, this.squareRocks.stream().filter(rock -> rock.getPosY() == realY)
-					.sorted((a, b) -> a.getPosX() > b.getPosX() ? 1 : -1).toList());
+		for (Rock rock : this.squareRocks) {
+			int posX = rock.getPosX();
+			int posY = rock.getPosY();
+
+//			// get information relevant when tilting east
+//			for (int x = posX - 1; x >= 0; x--) {
+//				if (this.getRock(x, posY).getRockType().equals(RockType.SQUARE))
+//					break;
+//				else {
+//					for (int y = posY - 1; y >= -1; y--) {
+//						if (y < 0) {
+//							Rock artificialRock = new Rock(x, y, RockType.SQUARE);
+//							artificialRock.setArtificial(true);
+//							if (!this.artificialRocks.contains(artificialRock))
+//								this.artificialRocks.add(artificialRock);
+//							// this.squareRocks.add(artificialRock); //dont... you are iterating over that
+//							// exact list!
+//							rock.addReleventBit(artificialRock, rock.getPosY() - artificialRock.getPosY() + 1);
+//							break;
+//						} else {
+//							Rock probe = this.getRock(x, y);
+//							if (probe.getRockType().equals(RockType.SQUARE)) {
+//								rock.addReleventBit(probe, rock.getPosY() - probe.getPosY() + 1);
+//							}
+//						}
+//					}
+//				}
+//			}
+//
+			// get information relevant when tilting north
+			for (int y = posY + 1; y < this.height; y++) {
+				if (this.getRock(posX, y).getRockType().equals(RockType.SQUARE))
+					break;
+				else {
+					for (int x = posX - 1; x >= -1; x--) {
+						if (x < 0) {
+							Rock artificialRock = new Rock(x, y, RockType.SQUARE);
+							artificialRock.setArtificial(true);
+							if (!this.artificialRocks.contains(artificialRock))
+								this.artificialRocks.add(artificialRock);
+							rock.addRelevantBitNorth(artificialRock, rock.getPosX() - artificialRock.getPosX() + 1);
+							break;
+						} else {
+							Rock probe = this.getRock(x, y);
+							if (probe.getRockType().equals(RockType.SQUARE)) {
+								rock.addRelevantBitNorth(probe, rock.getPosX() - probe.getPosX() + 1);
+							}
+						}
+					}
+				}
+			}
+//
+//			// get information relevant when tilting west
+//			for (int x = posX + 1; x < this.width; x++) {
+//				if (this.getRock(x, posY).getRockType().equals(RockType.SQUARE))
+//					break;
+//				else {
+//					for (int y = posY + 1; y <= this.height; y++) {
+//						if (y > this.height - 1) {
+//							Rock artificialRock = new Rock(x, y, RockType.SQUARE);
+//							artificialRock.setArtificial(true);
+//							if (!this.artificialRocks.contains(artificialRock))
+//								this.artificialRocks.add(artificialRock);
+//							// this.squareRocks.add(artificialRock); //dont... you are iterating over that
+//							// exact list!
+//							rock.addReleventBitSouth(artificialRock, rock.getPosY() - artificialRock.getPosY() + 1);
+//							break;
+//						} else {
+//							Rock probe = this.getRock(x, y);
+//							if (probe.getRockType().equals(RockType.SQUARE)) {
+//								rock.addReleventBitSouth(probe, probe.getPosY() - rock.getPosY() + 1);
+//							}
+//						}
+//					}
+//				}
+//			}
+
+			// get information relevant when tilting south
+			for (int y = posY - 1; y >= -1; y--) {
+				if (y < 0 || this.getRock(posX, y).getRockType().equals(RockType.SQUARE))
+					break;
+				else {
+					for (int x = posX + 1; x < this.height; x++) {
+						if (x >= this.height) {
+							Rock artificialRock = new Rock(x, y, RockType.SQUARE);
+							artificialRock.setArtificial(true);
+							if (!this.artificialRocks.contains(artificialRock))
+								this.artificialRocks.add(artificialRock);
+							rock.addReleventBitSouth(artificialRock, artificialRock.getPosX() - rock.getPosX() - 1);
+							break;
+						} else {
+							Rock probe = this.getRock(x, y);
+							if (probe.getRockType().equals(RockType.SQUARE)) {
+								rock.addReleventBitSouth(probe, probe.getPosX() - rock.getPosX() - 1);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
 	public void tiltNorth() {
-		for (int x = 0; x < this.width; x++) {
-			int realX = x;
-			List<Rock> verticalSquareRocks = this.verticalSquareRockMap.get(x);
-			List<Rock> verticalRoundRocks = this.roundRocks.stream().filter(rock -> rock.getPosX() == realX).toList();
-			Rock first = null;
-			int obstacleY = -1;
-			Rock second = verticalSquareRocks.get(0);
-			for (int i = 1; i < verticalSquareRocks.size(); i++) {
-				int reach = this.height - 1;
-				if (first != null) {
-					obstacleY = first.getPosY();
-				}
-				if (second != null) {
-					reach = second.getPosY();
-				}
-				int realObstacleY = obstacleY;
-				int realReach = reach;
-				List<Rock> roundRocksInReach = verticalRoundRocks.stream()
-						.filter(rock -> rock.getPosY() > realObstacleY && rock.getPosY() < realReach).toList();
-				int matchingRocks = roundRocksInReach.size();
-				for (Rock rock : roundRocksInReach) {
-					rock.setRockType(RockType.NONE);
-				}
-				for (int y = obstacleY + 1; y < obstacleY + matchingRocks; y++) {
-					this.getRock(realX, y).setRockType(RockType.ROUND);
-				}
 
-				first = second;
-				if (i >= verticalSquareRocks.size())
-					second = null;
-				else
-					second = verticalSquareRocks.get(i);
-			}
-
-		}
-
-		this.roundRocks = this.rocks.stream().filter(rock -> rock.getRockType().equals(RockType.ROUND)).toList();
 	}
-
-//	public void tiltNorth() {
-//		for (Rock rock : this.roundRocks) {
-//			int x = rock.getPosX();
-//			int y = rock.getPosY();
-//			if (rock.getRockType().equals(RockType.ROUND)) {
-//				int mostNortherPlace = y;
-//				Rock above = null;
-//				for (int i = y - 1; i >= 0; i--) {
-//					above = this.getRock(x, i);
-//					if (above.getRockType().equals(RockType.NONE)) {
-//						mostNortherPlace--;
-//					} else {
-//						break;
-//					}
-//				}
-//
-//				if (mostNortherPlace != y) {
-//					Rock toSwitch = this.getRock(x, mostNortherPlace);
-//					toSwitch.setRockType(RockType.ROUND);
-//					rock.setRockType(RockType.NONE);
-//				}
-//
-//				this.print();
-//			}
-//		}
-//		
-//		this.roundRocks = this.rocks.stream().filter(rock -> rock.getRockType().equals(RockType.ROUND)).toList();
-//	}
 
 	public void tiltWest() {
 		for (Rock rock : this.roundRocks) {
@@ -152,7 +175,6 @@ public class Platform {
 					rock.setRockType(RockType.NONE);
 				}
 
-				this.print();
 			}
 		}
 
@@ -172,14 +194,35 @@ public class Platform {
 		return "Platform [rocks=" + rocks + ", width=" + width + ", height=" + height + "]";
 	}
 
-	public void print() {
-		for (int y = 0; y < this.height; y++) {
-			char[] line = new char[this.width];
-			for (int x = 0; x < this.width; x++) {
-				line[x] = this.getRock(x, y).getRockType().getSymbol();
+	public void print(boolean relevance) {
+		if (relevance)
+			this.squareRocks.forEach(rock -> this.print(rock));
+		else {
+			for (int y = 0; y < this.height; y++) {
+				char[] line = new char[this.width];
+				for (int x = 0; x < this.width; x++) {
+					line[x] = this.getRock(x, y).getRockType().getSymbol();
+				}
+				System.out.println(new String(line));
 			}
-			System.out.println(new String(line));
 		}
 		System.out.println();
+	}
+
+	public void print(Rock relevance) {
+		System.out.println(relevance);
+		Map<Rock, Integer> relevantBitsSouth = relevance.getRelevantBitsSouth();
+		for (Map.Entry<Rock, Integer> entry : relevantBitsSouth.entrySet()) {
+			System.out.println(entry.getKey());
+			System.out.println(entry.getValue());
+		}
+//		for (int y = 0; y < this.height; y++) {
+//			char[] line = new char[this.width];
+//			for (int x = 0; x < this.width; x++) {
+//				line[x] = this.getRock(x, y).getRockType().getSymbol();
+//			}
+//			System.out.println(new String(line));
+//		}
+//		System.out.println();
 	}
 }

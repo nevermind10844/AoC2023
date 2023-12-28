@@ -61,8 +61,8 @@ public class Main {
 			}
 
 			long currentSum = getSum(done);
-			System.out.println(String.format("todo: %4d  running: %4d  done: %4d  (%d)", resolvers.size(),
-					running.size(), done.size(), currentSum));
+//			System.out.println(String.format("todo: %4d  running: %4d  done: %4d  (%d)", resolvers.size(),
+//					running.size(), done.size(), currentSum));
 
 			try {
 				Thread.sleep(100);

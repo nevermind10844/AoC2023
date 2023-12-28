@@ -6,16 +6,34 @@ import java.util.regex.Pattern;
 
 public class Input {
 	private String faultyData;
-	List<CorrectionBlock> correctionBlocks;
+	private List<CorrectionBlock> correctionBlocks;
 	private Pattern pattern;
 	private Map<Integer, Integer> remainingBlockSizes;
 	private Map<Integer, Integer> remainingCharacters;
+
+	private int firstPossibleStart;
+	private int lastPossibleStart;
+	private int lastForcedPosition;
 
 	public Input() {
 		this.faultyData = null;
 		this.correctionBlocks = new ArrayList<>();
 		this.remainingBlockSizes = new HashMap<>();
 		this.remainingCharacters = new HashMap<>();
+		this.firstPossibleStart = -1;
+		this.lastPossibleStart = -1;
+	}
+
+	public int getFirstPossibleStart() {
+		return firstPossibleStart;
+	}
+
+	public int getLastPossibleStart() {
+		return lastPossibleStart;
+	}
+
+	public int getLastForcedPosition() {
+		return lastForcedPosition;
 	}
 
 	public String getFaultyData() {
@@ -66,6 +84,7 @@ public class Input {
 	}
 
 	public void preProcess() {
+
 		for (int i = 0; i < this.correctionBlocks.size(); i++) {
 			int sum = 0;
 			for (int y = i; y < this.correctionBlocks.size(); y++) {
@@ -79,6 +98,29 @@ public class Input {
 		for (int i = 0; i < this.faultyData.length(); i++) {
 			this.remainingCharacters.put(i, this.faultyData.substring(i).length());
 		}
+		
+		for (int i = 0; i < this.faultyData.length(); i++) {
+			char c = this.faultyData.charAt(i);
+			if (c == '#') {
+				this.lastPossibleStart = i;
+				if (this.firstPossibleStart < 0) {
+					this.firstPossibleStart = i;
+				}
+				break;
+			} else if (c == '?' && firstPossibleStart < 0) {
+				this.firstPossibleStart = i;
+			}
+			if (firstPossibleStart >= 0 && lastPossibleStart >= 0)
+				break;
+		}
+		
+		if (this.firstPossibleStart < 0)
+			this.firstPossibleStart = 0;
+		if (this.lastPossibleStart < 0)
+			this.lastPossibleStart = this.faultyData.length() - 1 - this.getRemainingBlockSizes(0);
+		
+		this.lastForcedPosition = this.faultyData.lastIndexOf('#');
+		
 	}
 
 	@Override

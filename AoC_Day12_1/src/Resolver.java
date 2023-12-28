@@ -15,7 +15,7 @@ public class Resolver extends Thread {
 	
 	private boolean done;
 
-	private static int STACKS = 5;
+	private static int STACKS = 1;
 
 	Resolver(Input input) {
 		this.input = input;

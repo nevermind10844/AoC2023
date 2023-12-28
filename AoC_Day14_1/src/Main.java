@@ -15,9 +15,9 @@ public class Main {
 			}
 		}
 		
-		platform.print();
 		platform.done();
-		platform.tiltNorth();
+		platform.print(true);
+//		platform.tiltNorth();
 		long load = platform.getLoad();
 		System.out.println(load);
 		

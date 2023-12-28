@@ -1,48 +1,24 @@
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Resolver extends Thread {
-	private Thread t;
+
 	private Input input;
 	private long result;
-	
-	private char[] data;
 
-	private int correctionBlockSize;
-
-	private Map<Integer, Map<String, Boolean>> prefittedVariants;
+	private List<SubResolver> subResolvers;
+	private List<SubResolver> doneSubResolvers;
 
 	private boolean done;
 
-	private static int STACKS = 5;
+	private static int STACKS = 1;
 
-	Resolver(Input input) {
+	public Resolver(Input input) {
 		this.input = input;
 		this.result = 0L;
 		this.done = false;
-		this.correctionBlockSize = this.input.getCorrectionBlocks().size();
-		this.prefittedVariants = new HashMap<>();
-	}
-
-	public void run() {
-		this.result = 0L;
-
-		String faultyData = this.input.getFaultyData();
-		for (int i = 0; i < STACKS - 1; i++) {
-			this.input.setFaultyData(this.input.getFaultyData() + "?" + faultyData);
-		}
-		this.input.stackBlocks(STACKS);
-		this.correctionBlockSize = this.input.getCorrectionBlocks().size();
-
-		this.input.preProcess();
-		this.data = this.input.getFaultyData().toCharArray();
-		this.preProcess();
-
-		this.resolve(0, 0);
-
-		System.out.println(String.format("result: %d", this.result));
-
-		this.done = true;
+		this.subResolvers = new ArrayList<>();
+		this.doneSubResolvers = new ArrayList<>();
 	}
 
 	public boolean isDone() {
@@ -53,101 +29,51 @@ public class Resolver extends Thread {
 		return this.result;
 	}
 
-	public void resolve(int start, int currentBlockPosition) {
-		boolean chainBroken = false;
-		for (int i = currentBlockPosition; i < this.correctionBlockSize; i++) {
-			if (chainBroken) {
-				break;
-			} else {
-				for (int j = start; j < this.data.length; j++) {
-					if (this.input.getRemainingCharacters(j) < this.input.getRemainingBlockSizes(i)) {
-						chainBroken = true;
-						break;
-					} else {
-						CorrectionBlock block = input.correctionBlocks.get(i);
-						if (this.blockFits(j, block.getBlockSize())) {
-							if (i == this.correctionBlockSize - 1) {
-								this.result++;
-							} else {
-								resolve(j + block.getBlockSize() + 1, i + 1);
-							}
-						} else {
-							if (this.data[j] == '#') {
-								chainBroken = true;
-								break;
-							}
-						}
-					}
-				}
+	@Override
+	public void run() {
+		this.result = 0L;
+
+		String faultyData = this.input.getFaultyData();
+		for (int i = 0; i < STACKS - 1; i++) {
+			this.input.setFaultyData(this.input.getFaultyData() + "?" + faultyData);
+		}
+		this.input.stackBlocks(STACKS);
+
+		this.input.preProcess();
+		Prefitting prefitting = new Prefitting(input);
+
+		for (int i = this.getFirstPossibleStart(); i <= this.getLastPossibleStart(); i++) {
+			SubResolver subResolver = new SubResolver(prefitting, i);
+			this.subResolvers.add(subResolver);
+			subResolver.start();
+		}
+
+		while (subResolvers.size() > 0) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-		}
-	}
 
-	private void preProcess() {
-		for (int i = 0; i < this.input.correctionBlocks.size(); i++) {
-			CorrectionBlock block = this.input.correctionBlocks.get(i);
-			if (!this.prefittedVariants.containsKey(block.getBlockSize())) {
-				Map<String, Boolean> blockwisePrefittedVariants = new HashMap<>();
-				String data = this.input.getFaultyData();
-				for (int y = 1; y < data.length() - block.getBlockSize(); y++) {
-					blockwisePrefittedVariants.put(data.substring(y - 1, y + block.getBlockSize() + 1),
-							this.preFit(y, block.getBlockSize()));
-				}
-				this.prefittedVariants.put(block.getBlockSize(), blockwisePrefittedVariants);
-			}
-		}
-	}
-
-	private boolean blockFits(int position, int length) {
-		if (position == 0 || position + length == this.data.length)
-			return preFit(position, length);
-
-		String key = String.copyValueOf(this.data, position-1, length + 2);
-		return this.prefittedVariants.get(length).get(key);
-
-	}
-
-	private boolean preFit(int position, int length) {
-		// precalculating some values
-		int currentDataLength = this.data.length;
-		boolean notFirst = position > 0;
-		int precalcLength = length + position;
-
-		// checking characters spanning the block
-		for (int i = position; i < precalcLength; i++) {
-			char c = this.data[i];
-			if (c != '#' && c != '?') {
-				return false;
-			}
+			List<SubResolver> readyResolvers = this.subResolvers.stream().filter(resolver -> resolver.isDone())
+					.toList();
+			this.subResolvers.removeAll(readyResolvers);
+			this.doneSubResolvers.addAll(readyResolvers);
 		}
 
-		// checking character after
-		if (position < currentDataLength - length) {
-			char c = this.data[precalcLength];
-			if (c != '?' && c != '.') {
-				return false;
-			}
-		}
+		this.result = this.doneSubResolvers.stream().mapToLong(res -> res.getResult()).sum();
 
-		// checking character before
-		if (notFirst) {
-			char c = this.data[position - 1];
-			if (c != '?' && c != '.') {
-				return false;
-			}
-		}
-
-		return true;
+		this.done = true;
 	}
 
-	public void start() {
-		if (t == null) {
-			t = new Thread(this, this.input.getFaultyData());
-			t.start();
-		}
+	public int getFirstPossibleStart() {
+		return this.input.getFirstPossibleStart();
 	}
 
-	public String getThreadName() {
-		return this.t.getName() + " " + this.input.getCorrectionBlocksAsString();
+	public int getLastPossibleStart() {
+		return this.input.getLastPossibleStart();
 	}
+
+
+
 }

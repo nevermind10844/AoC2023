@@ -1,15 +1,15 @@
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Main {
+	
+	private static int MAX_THREADS = 16;
+	private static int THREAD_LOOP_INTERVAL = 20;
+	private static int STATE_CHECK_INTERVAL = 1000;
 
 	public static void main(String[] args) {
 		List<String> strings = InputReader.readInput();
 		List<Resolver> resolvers = new ArrayList<>();
-		List<Resolver> running = new ArrayList<>();
-		List<Resolver> done = new ArrayList<>();
 
 		for (String line : strings) {
 			Input input = new Input();
@@ -28,53 +28,23 @@ public class Main {
 			Resolver r = new Resolver(input);
 			resolvers.add(r);
 		}
-
-		int numResolvers = resolvers.size();
-		int maxThreads = 12;
-
-		boolean measured = false;
-		long start = System.currentTimeMillis();
-
-		while (done.size() < numResolvers) {
-			if (resolvers.size() > 0 && running.size() < maxThreads) {
-				Resolver r = resolvers.get(0);
-				running.add(r);
-				resolvers.remove(r);
-				r.start();
-			}
-
-			List<Resolver> ready = running.stream().filter(r -> r.isDone()).toList();
-			running.removeAll(ready);
-			
-			done.addAll(ready);
-			
-			if (!measured && done.size() >= 200) {
-				long end = System.currentTimeMillis();
-				System.err.println(String.format("time to 200: %f", (end - start) / 1000f));
-				measured = true;
-			}
-
-			long currentSum = getSum(done);
-			System.out.println(String.format("todo: %4d  running: %4d  done: %4d  (%d)", resolvers.size(),
-					running.size(), done.size(), currentSum));
-
+		
+		GameMaster gm = new GameMaster(resolvers, MAX_THREADS, THREAD_LOOP_INTERVAL);
+		gm.start();
+		
+		while (!gm.isReady()) {
+			System.out.println(gm.printCurrentState());
 			try {
-				Thread.sleep(100);
+				Thread.sleep(STATE_CHECK_INTERVAL);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-
-		long result = getSum(done);
+		
+		long result = gm.getResult();
+		
 		System.out.println("final: " + result);
 	}
 
-	private static long getSum(List<Resolver> resolvers) {
-		long currentSum = 0L;
-		List<Long> resultList = resolvers.stream().map(item -> item.getResult()).toList();
-		for (long result : resultList) {
-			currentSum += result;
-		}
-		return currentSum;
-	}
+
 }

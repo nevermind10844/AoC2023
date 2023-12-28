@@ -27,3 +27,7 @@ time to 111:   19,344000 //validation before next resolve call is made
 time to 200: 1011,655029 //a bit better
 time to 111:   16,478001 //not replacing the string content anymore. now able to hold it as a char-array where access is way faster
 time to 200:  321,917999 //fastest so far. that was a huge improvement. should only take "some" hours now instead of some days...
+time to 111:    5,955000 //16 threads now and restructured to make execution and output independent. main loop is now 20ms while output is 1000ms!
+time to 200:  158,345993 //
+time to 200:   15,004000 //32 threads; single thread performance probably still sucks!
+time to 200:  322,753998 //16 main threads but all the inputs have subthreads based on number of possible starting positions.
